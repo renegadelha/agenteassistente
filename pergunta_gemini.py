@@ -14,7 +14,7 @@ client = genai.Client(api_key=GEMINI_KEY)
 
 # Cria a sessão de chat com histórico e instruções de sistema (system instruction)
 chat_sessao = client.chats.create(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash-lite",
     config={
         "system_instruction": "Você é o Jarvis, um assistente virtual inteligente, direto e conciso. Suas respostas serão lidas em voz alta por um sistema de áudio, portanto, seja breve e evite formatações complexas como listas longas ou markdown.",
         "temperature": 0.7
