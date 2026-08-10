@@ -1,13 +1,18 @@
-import subprocess
 import os
 import sys
+from piper.voice import Voice
 
-# Caminho para o modelo baixado do Piper
+# Caminho para o modelo baixado
 MODELO_PATH = "voices/pt_BR-faber-medium.onnx"
+CONFIG_PATH = "voices/pt_BR-faber-medium.onnx.json"
+
+# Carrega a voz do Piper diretamente na memória (muito mais rápido e sem problemas de shell)
+print("[INFO] Carregando modelo do Piper TTS...")
+voz_piper = Voice.load(MODELO_PATH, config_path=CONFIG_PATH)
 
 
 def falar_texto(texto):
-    """Gera o áudio usando o Piper TTS e reproduz usando o ffplay"""
+    """Gera o áudio usando a API nativa do Piper e reproduz via ffplay"""
     if not texto.strip():
         return
 
@@ -16,11 +21,13 @@ def falar_texto(texto):
     arquivo_audio = "resposta.wav"
 
     try:
-        # 1. Gera o arquivo WAV via Piper
-        comando_piper = f"echo '{texto}' | python3 -m piper --model {MODELO_PATH} --output_file {arquivo_audio}"
-        subprocess.run(comando_piper, shell=True, check=True)
+        # 1. Usa a API do Piper para sintetizar o texto diretamente para um arquivo WAV
+        import wave
+        with wave.open(arquivo_audio, "wb") as wav_file:
+            voz_piper.synthesize(texto, wav_file)
 
-        # 2. Reproduz o áudio usando ffplay de forma limpa e silenciosa
+        # 2. Reproduz o áudio limpo usando o ffplay
+        import subprocess
         subprocess.run(
             ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", arquivo_audio],
             check=True
@@ -29,7 +36,7 @@ def falar_texto(texto):
     except Exception as e:
         print(f"[ERRO NO TTS]: Falha ao sintetizar ou reproduzir voz -> {e}")
     finally:
-        # Limpa o arquivo temporário de áudio
+        # Remove o arquivo temporário
         if os.path.exists(arquivo_audio):
             os.remove(arquivo_audio)
 
