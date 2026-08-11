@@ -61,7 +61,8 @@ def falar_texto(texto):
 
         # Remove o arquivo temporário
         if os.path.exists(arquivo_audio):
-            os.remove(arquivo_audio)
+            print('falta remover o arquivo')
+            #os.remove(arquivo_audio)
 
 
 if __name__ == "__main__":
