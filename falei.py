@@ -1,8 +1,10 @@
 import subprocess
 import os
 
-# Força o pygame a utilizar o driver ALSA diretamente na Orange Pi
+# Força o pygame a utilizar o driver ALSA e aponta diretamente para a placa analógica (card 1)
 os.environ['SDL_AUDIODRIVER'] = 'alsa'
+os.environ['AUDIODEV'] = 'plughw:1,0'
+
 import pygame
 
 # Caminho para o modelo baixado do Piper
@@ -10,7 +12,7 @@ MODELO_PATH = "voices/pt_BR-faber-medium.onnx"
 
 
 def falar_texto(texto):
-    """Gera o áudio usando o Piper e reproduz de forma confiável usando o Pygame"""
+    """Gera o áudio usando o Piper e reproduz de forma confiável usando o Pygame na placa correta"""
     if not texto.strip():
         return
 
@@ -34,7 +36,7 @@ def falar_texto(texto):
             stderr=subprocess.DEVNULL
         )
 
-        # 2. Inicializa o mixer do Pygame para tocar o áudio gerado
+        # 2. Inicializa o mixer do Pygame
         try:
             pygame.mixer.init(frequency=22050, size=-16, channels=1, buffer=2048)
         except pygame.error as e:
@@ -49,7 +51,7 @@ def falar_texto(texto):
         while pygame.mixer.music.get_busy():
             pygame.time.Clock().tick(10)
 
-        # Fecha o mixer para liberar a placa de som para o microfone
+        # Fecha o mixer para liberar a placa de som
         pygame.mixer.quit()
 
     except Exception as e:
@@ -69,4 +71,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         falar_texto(" ".join(sys.argv[1:]))
     else:
-        falar_texto("Olá Renê, sistema de som integrado com Pygame funcionando com sucesso.")
+        falar_texto("Testando o som do Jarvis na placa analógica.")
