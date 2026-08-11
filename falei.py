@@ -58,7 +58,7 @@ def falar_texto(texto):
         # Remove o arquivo mesmo se ocorrer erro
         if os.path.exists(arquivo_audio):
             try:
-                os.remove(arquivo_audio)
+                #os.remove(arquivo_audio)
                 print("[INFO] Arquivo temporário removido.")
             except Exception as e:
                 print(f"[AVISO] Não foi possível remover {arquivo_audio}: {e}")
