@@ -1,18 +1,30 @@
 import os
 import sys
-from piper.voice import Voice
+import subprocess
+import wave
 
-# Caminho para o modelo baixado
+from piper.voice import PiperVoice
+
+
+# Caminhos para o modelo
 MODELO_PATH = "voices/pt_BR-faber-medium.onnx"
 CONFIG_PATH = "voices/pt_BR-faber-medium.onnx.json"
 
-# Carrega a voz do Piper diretamente na memória (muito mais rápido e sem problemas de shell)
+
+# Carrega o modelo do Piper na memória
 print("[INFO] Carregando modelo do Piper TTS...")
-voz_piper = Voice.load(MODELO_PATH, config_path=CONFIG_PATH)
+
+voz_piper = PiperVoice.load(
+    MODELO_PATH,
+    config_path=CONFIG_PATH
+)
+
+print("[INFO] Modelo carregado com sucesso!")
 
 
 def falar_texto(texto):
-    """Gera o áudio usando a API nativa do Piper e reproduz via ffplay"""
+    """Gera o áudio usando Piper TTS e reproduz pela caixa de som."""
+
     if not texto.strip():
         return
 
@@ -21,25 +33,44 @@ def falar_texto(texto):
     arquivo_audio = "resposta.wav"
 
     try:
-        # 1. Usa a API do Piper para sintetizar o texto diretamente para um arquivo WAV
-        import wave
+
+        # 1. Gera o arquivo WAV
         with wave.open(arquivo_audio, "wb") as wav_file:
             voz_piper.synthesize(texto, wav_file)
 
-        # 2. Reproduz o áudio limpo usando o ffplay
-        import subprocess
+        print("[INFO] Áudio gerado.")
+
+        # 2. Reproduz pela saída de áudio
         subprocess.run(
-            ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", arquivo_audio],
+            [
+                "ffplay",
+                "-nodisp",
+                "-autoexit",
+                "-loglevel",
+                "quiet",
+                arquivo_audio
+            ],
             check=True
         )
 
     except Exception as e:
-        print(f"[ERRO NO TTS]: Falha ao sintetizar ou reproduzir voz -> {e}")
+
+        print(f"[ERRO NO TTS]: {e}")
+
     finally:
+
         # Remove o arquivo temporário
         if os.path.exists(arquivo_audio):
             os.remove(arquivo_audio)
 
+
 if __name__ == "__main__":
-    nome = sys.argv[1]
-    falar_texto(nome)
+
+    if len(sys.argv) < 2:
+        print("Uso:")
+        print("python3 falar.py \"Texto para falar\"")
+        sys.exit(1)
+
+    texto = " ".join(sys.argv[1:])
+
+    falar_texto(texto)
