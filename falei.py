@@ -1,12 +1,26 @@
-import subprocess
 import os
+import sys
+import subprocess
+import wave
 
-# Caminho para o modelo baixado
+from piper.voice import PiperVoice
+
+
 MODELO_PATH = "voices/pt_BR-faber-medium.onnx"
+CONFIG_PATH = "voices/pt_BR-faber-medium.onnx.json"
+
+print("[INFO] Carregando modelo do Piper TTS...")
+
+voz_piper = PiperVoice.load(
+    MODELO_PATH,
+    config_path=CONFIG_PATH
+)
+
+print("[INFO] Modelo carregado com sucesso!")
 
 
 def falar_texto(texto):
-    """Gera o áudio usando o Piper via linha de comando e reproduz no card 1 via aplay"""
+
     if not texto.strip():
         return
 
@@ -15,42 +29,48 @@ def falar_texto(texto):
     arquivo_audio = "resposta.wav"
 
     try:
-        # 1. Sintetiza o texto injetando via stdin de forma segura
-        comando_piper = [
-            "python3", "-m", "piper",
-            "--model", MODELO_PATH,
-            "--output_file", arquivo_audio
-        ]
 
+        # Gera o WAV
+        with wave.open(arquivo_audio, "wb") as wav_file:
+            voz_piper.synthesize(texto, wav_file)
+
+        print("[INFO] Áudio gerado.")
+
+        # Reproduz na saída analógica da Orange Pi
         subprocess.run(
-            comando_piper,
-            input=texto.encode("utf-8"),
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            [
+                "aplay",
+                "-D",
+                "plughw:CARD=ac200audio,DEV=0",
+                arquivo_audio
+            ],
+            check=True
         )
 
-        # 2. Reproduz especificamente na placa analógica (card 1, device 0)
-        subprocess.run(
-            ["aplay", "-D", "plughw:1,0", arquivo_audio],
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
+        print("[INFO] Áudio reproduzido.")
 
     except Exception as e:
-        print(f"[ERRO NO TTS]: Falha ao sintetizar ou reproduzir voz -> {e}")
+
+        print(f"[ERRO NO TTS]: {e}")
+
     finally:
-        # Limpa o arquivo temporário com segurança
+
+        # Remove o arquivo mesmo se ocorrer erro
         if os.path.exists(arquivo_audio):
             try:
                 os.remove(arquivo_audio)
-            except:
-                pass
+                print("[INFO] Arquivo temporário removido.")
+            except Exception as e:
+                print(f"[AVISO] Não foi possível remover {arquivo_audio}: {e}")
 
 
 if __name__ == "__main__":
-    import sys
 
-    if len(sys.argv) > 1:
-        falar_texto(" ".join(sys.argv[1:]))
+    if len(sys.argv) < 2:
+        print("Uso:")
+        print('python3 falei.py "Texto para falar"')
+        sys.exit(1)
+
+    texto = " ".join(sys.argv[1:])
+
+    falar_texto(texto)
