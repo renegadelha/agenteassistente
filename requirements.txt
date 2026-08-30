@@ -2,10 +2,7 @@ openwakeword
 numpy
 SpeechRecognition
 PyAudio
-gTTS
-google-generativeai
 requests
-python-dotenv
 duckduckgo-search
 python-dotenv
-google-generativeai
+google-genai
