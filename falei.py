@@ -60,7 +60,8 @@ def falar_texto(texto):
         # Limpa o arquivo temporário com segurança
         if os.path.exists(arquivo_audio):
             try:
-                os.remove(arquivo_audio)
+                #os.remove(arquivo_audio)
+                print('tentei remover')
             except:
                 pass
 

@@ -13,18 +13,31 @@ from dotenv import load_dotenv
 # Carrega as variáveis do arquivo .env local
 load_dotenv()
 
-# Puxa a chave com segurança para uma variável
+# Puxa a chave com segurança para uma variável[cite: 1]
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 
 if not GEMINI_KEY:
     raise ValueError("Atenção: A chave da API do Gemini não foi encontrada no arquivo .env!")
 
-# 1. Configurações de Áudio
+# 1. Configurações de Áudio[cite: 1]
 RATE = 48000
 CHUNK_SIZE_48K = 1280 * 3
-DEVICE_INDEX = 0  # Microfone na Orange Pi
 
-# 2. Inicializar o modelo do Jarvis
+# --- AJUSTE: Busca dinâmica do Microfone USB ---
+recognizer = sr.Recognizer()
+DEVICE_INDEX = None
+print("[INFO] Procurando microfone USB...")
+for i, name in enumerate(sr.Microphone.list_microphone_names()):
+    if "USB" in name:
+        DEVICE_INDEX = i
+        print(f"[INFO] Microfone travado no índice [{i}]: {name}")
+        break
+
+if DEVICE_INDEX is None:
+    print("[AVISO] Microfone USB não encontrado. Tentando o padrão (0).")
+    DEVICE_INDEX = 0
+
+# 2. Inicializar o modelo do Jarvis[cite: 1]
 print("[INFO] Buscando modelo 'hey_jarvis'...")
 caminhos = get_pretrained_model_paths()
 jarvis_paths = [p for p in caminhos if "hey_jarvis" in p.lower()]
@@ -35,17 +48,15 @@ if not jarvis_paths:
 print(f"[INFO] Modelo carregado: {jarvis_paths[0]}")
 oww_model = Model(wakeword_model_paths=[jarvis_paths[0]])
 
-recognizer = sr.Recognizer()
+# --- AJUSTES CRÍTICOS PARA NÃO CORTAR O FINAL DA FALA ---[cite: 1]
+recognizer.pause_threshold = 1.5
+recognizer.non_speaking_duration = 0.8
 
-# --- AJUSTES CRÍTICOS PARA NÃO CORTAR O FINAL DA FALA ---
-recognizer.pause_threshold = 1.5  # Tempo de silêncio (em segundos) necessário para o Google entender que você terminou de falar (padrão é 0.8)
-recognizer.non_speaking_duration = 0.8  # Tempo de áudio sem fala considerado antes de fechar a escuta
-
-# 3. Inicializar o Microfone ÚNICO
-print("\n[INFO] Conectando ao microfone...")
+# 3. Inicializar o Microfone ÚNICO[cite: 1]
+print("\n[INFO] Conectando ao hardware de áudio...")
 mic = sr.Microphone(device_index=DEVICE_INDEX, sample_rate=RATE, chunk_size=CHUNK_SIZE_48K)
 
-# Flag booleana de estado inicial
+# Flag booleana de estado inicial[cite: 1]
 perguntei = False
 
 try:
@@ -54,12 +65,11 @@ try:
         recognizer.adjust_for_ambient_noise(source, duration=1.0)
 
         while True:
-            # Zera completamente a memória de predição do modelo
             oww_model.reset()
 
             print("\n🎙️ Aguardando... Diga 'Hey Jarvis'")
 
-            # Loop secundário (Procurando o Wake Word)
+            # Loop secundário (Procurando o Wake Word)[cite: 1]
             while True:
                 raw_data = source.stream.read(CHUNK_SIZE_48K)
                 audio_frame_48k = np.frombuffer(raw_data, dtype=np.int16)
@@ -81,14 +91,12 @@ try:
                     print("\n🔥 JARVIS DETECTADO!")
                     break
 
-                    # --- TRANSIÇÃO PARA A ESCUTA DA FRASE ---
             print("[JARVIS]: Sou todo ouvidos! Pode falar...")
 
             perguntei = True
             time.sleep(0.3)
 
             try:
-                # phrase_time_limit aumentado para 20 segundos para dar tempo de falar frases completas
                 audio_gravado = recognizer.listen(source, timeout=5, phrase_time_limit=20)
                 print("[JARVIS]: Processando sua voz...")
 
@@ -97,10 +105,11 @@ try:
                 print("\n" + "=" * 40)
                 print(f"🗣️ PRONTO PARA ENVIAR À IA: '{texto}'")
                 print("=" * 40 + "\n")
+
                 resposta_ia = perguntar_ao_gemini(texto)
                 print(f"🗣️ A RESPOSTA FOI: '{resposta_ia}'")
 
-                # 1. Gera o arquivo .wav
+                # 1. Gera o arquivo MP3 e toca na caixa P2[cite: 1]
                 ts.falar_resposta(resposta_ia)
 
             except sr.WaitTimeoutError:
@@ -110,7 +119,6 @@ try:
             except Exception as e:
                 print(f"[ERRO]: Falha no reconhecimento -> {e}")
 
-            # --- FIM DO CICLO DE PERGUNTA (BLINDAGEM ANTI-ECO) ---
             print("[INFO] Entrando em modo de blindagem pós-resposta...")
 
             oww_model.reset()
