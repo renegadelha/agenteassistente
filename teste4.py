@@ -46,7 +46,7 @@ if not jarvis_paths:
     raise ValueError("Modelo 'hey_jarvis' não foi encontrado.")
 
 print(f"[INFO] Modelo carregado: {jarvis_paths[0]}")
-oww_model = Model(wakeword_models=[jarvis_paths[0]])
+oww_model = Model(wakeword_models=jarvis_paths[0])
 
 # --- AJUSTES CRÍTICOS PARA NÃO CORTAR O FINAL DA FALA ---[cite: 1]
 recognizer.pause_threshold = 1.5
