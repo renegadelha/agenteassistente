@@ -5,7 +5,7 @@ from openwakeword import get_pretrained_model_paths
 import speech_recognition as sr
 import time
 from pergunta_gemini import perguntar_ao_gemini
-import tocar_som as ts
+import tocar_som_antg as ts
 
 import os
 from dotenv import load_dotenv
