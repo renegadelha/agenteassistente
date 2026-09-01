@@ -1,6 +1,7 @@
 import numpy as np
 import openwakeword
 from openwakeword.model import Model
+
 from openwakeword import get_pretrained_model_paths
 import speech_recognition as sr
 import time
@@ -12,7 +13,7 @@ from dotenv import load_dotenv
 
 # Carrega as variáveis do arquivo .env local
 load_dotenv()
-
+openwakeword.utils.download_models()
 # Puxa a chave com segurança para uma variável[cite: 1]
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 
