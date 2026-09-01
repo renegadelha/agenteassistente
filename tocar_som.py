@@ -2,24 +2,58 @@ import subprocess
 
 MODELO_PATH = "voices/pt_BR-faber-medium.onnx"
 
-import pyttsx3
-
 
 def falar_resposta(texto):
+    """Gera e reproduz áudio via streaming em tempo real com alta performance"""
     if not texto or not texto.strip():
         return
 
-    print("[TTS]: Sintetizando áudio rápido via pyttsx3 (espeak)...")
+    print("[TTS]: Sintetizando e reproduzindo áudio instantaneamente...")
 
-    # Inicializa o motor
-    engine = pyttsx3.init()
+    # --output-raw joga o fluxo de áudio puro direto na memória sem headers
+    # --length-scale 0.9 (opcional) acelera levemente a velocidade da fala para dar mais agilidade
+    comando_piper = [
+        "python3", "-m", "piper",
+        "--model", MODELO_PATH,
+        "--output_raw",
+        "--length-scale", "0.95"
+    ]
 
-    # Ajusta a velocidade da voz (o padrão costuma ser muito rápido)
-    engine.setProperty('rate', 160)
+    # Configuramos o aplay para o formato padrão do Piper (22050Hz, 16-bit, Mono)
+    # Isso faz o som disparar de imediato na caixa USB
+    comando_aplay = [
+        "aplay", "-q",
+        "-r", "22050",
+        "-f", "S16_LE",
+        "-c", "1"
+    ]
 
-    # Fila o texto e reproduz
-    engine.say(texto)
-    engine.runAndWait()
+    try:
+        # Abre o processo do Piper
+        piper_proc = subprocess.Popen(
+            comando_piper,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL
+        )
+
+        # Abre o aplay conectado diretamente à saída do Piper
+        aplay_proc = subprocess.Popen(
+            comando_aplay,
+            stdin=piper_proc.stdout,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+
+        # Envia o texto e fecha o canal de entrada
+        piper_proc.stdin.write(texto.encode("utf-8"))
+        piper_proc.stdin.close()
+
+        # Aguarda a reprodução terminar
+        aplay_proc.wait()
+
+    except Exception as e:
+        print(f"[ERRO NO ÁUDIO]: {e}")
 
 
 def falar_resposta2(texto):
