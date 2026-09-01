@@ -7,6 +7,7 @@ import speech_recognition as sr
 import time
 from pergunta_gemini import perguntar_ao_gemini
 import tocar_som as ts
+import os
 from groq import Groq
 
 # (Suas variáveis de ambiente existentes)
