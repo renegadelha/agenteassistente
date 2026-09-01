@@ -43,12 +43,6 @@ print("[INFO] Buscando modelo 'hey_jarvis'...")
 # 1. Busca todos os caminhos disponíveis
 caminhos = get_pretrained_model_paths()
 
-# Mostra todos os caminhos encontrados pela biblioteca na tela
-print("[DEBUG] Todos os caminhos retornados:")
-for caminho in caminhos:
-    print(f" -> {caminho}")
-
-# Filtra o do Jarvis
 jarvis_paths = [p for p in caminhos if "hey_jarvis" in p.lower()]
 
 if not jarvis_paths:
