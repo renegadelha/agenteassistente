@@ -17,7 +17,8 @@ chat_sessao = client.chats.create(
     model="gemini-3.5-flash-lite",
     config={
         "system_instruction": "Você é o Jarvis, um assistente virtual inteligente, direto e conciso. Suas respostas serão lidas em voz alta por um sistema de áudio, portanto, seja breve e evite formatações complexas como listas longas ou markdown.",
-        "temperature": 0.7
+        "temperature": 0.7,
+        "thinking_level": "low"
     }
 )
 
