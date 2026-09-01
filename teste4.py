@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 # Carrega as variáveis do arquivo .env local
 load_dotenv()
-openwakeword.utils.download_models()
+#openwakeword.utils.download_models()
 # Puxa a chave com segurança para uma variável[cite: 1]
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 
