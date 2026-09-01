@@ -112,7 +112,6 @@ try:
                 resposta_ia = perguntar_ao_gemini(texto)
                 print(f"🗣️ A RESPOSTA FOI: '{resposta_ia}'")
 
-                # 1. Gera o arquivo MP3 e toca na caixa P2[cite: 1]
                 ts.falar_resposta(resposta_ia)
 
             except sr.WaitTimeoutError:
