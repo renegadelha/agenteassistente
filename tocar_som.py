@@ -1,7 +1,7 @@
 import subprocess
 
-#MODELO_PATH = "voices/pt_BR-faber-medium.onnx"
-MODELO_PATH = "voices/pt_BR-edresson-low.onnx"
+MODELO_PATH = "voices/pt_BR-faber-medium.onnx"
+#MODELO_PATH = "voices/pt_BR-edresson-low.onnx"
 
 
 
