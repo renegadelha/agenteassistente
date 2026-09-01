@@ -2,8 +2,27 @@ import subprocess
 
 MODELO_PATH = "voices/pt_BR-faber-medium.onnx"
 
+import pyttsx3
+
 
 def falar_resposta(texto):
+    if not texto or not texto.strip():
+        return
+
+    print("[TTS]: Sintetizando áudio rápido via pyttsx3 (espeak)...")
+
+    # Inicializa o motor
+    engine = pyttsx3.init()
+
+    # Ajusta a velocidade da voz (o padrão costuma ser muito rápido)
+    engine.setProperty('rate', 160)
+
+    # Fila o texto e reproduz
+    engine.say(texto)
+    engine.runAndWait()
+
+
+def falar_resposta2(texto):
     """Gera o áudio e toca simultaneamente via pipeline, sem salvar em disco"""
     if not texto or not texto.strip():
         return
