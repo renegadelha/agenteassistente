@@ -39,13 +39,21 @@ if DEVICE_INDEX is None:
 
 # 2. Inicializar o modelo do Jarvis[cite: 1]
 print("[INFO] Buscando modelo 'hey_jarvis'...")
+# 1. Busca todos os caminhos disponíveis
 caminhos = get_pretrained_model_paths()
+
+# Mostra todos os caminhos encontrados pela biblioteca na tela
+print("[DEBUG] Todos os caminhos retornados:")
+for caminho in caminhos:
+    print(f" -> {caminho}")
+
+# Filtra o do Jarvis
 jarvis_paths = [p for p in caminhos if "hey_jarvis" in p.lower()]
 
 if not jarvis_paths:
     raise ValueError("Modelo 'hey_jarvis' não foi encontrado.")
 
-print(f"[INFO] Modelo carregado: {jarvis_paths[0]}")
+print(f"[INFO] Modelo selecionado: {jarvis_paths[0]}")
 oww_model = Model(wakeword_models=[jarvis_paths[0]])
 
 # --- AJUSTES CRÍTICOS PARA NÃO CORTAR O FINAL DA FALA ---[cite: 1]
