@@ -1,7 +1,7 @@
 import subprocess
 
-#MODELO_PATH = "voices/pt_BR-faber-medium.onnx"
-MODELO_PATH = "voices/pt_BR-edresson-low.onnx"
+MODELO_PATH = "voices/pt_BR-faber-medium.onnx"
+#MODELO_PATH = "voices/pt_BR-edresson-low.onnx"
 
 
 
@@ -24,21 +24,13 @@ def falar_resposta(texto):
 
     # Configuramos o aplay para o formato padrão do Piper (22050Hz, 16-bit, Mono)
     # Isso faz o som disparar de imediato na caixa USB
-    '''
     comando_aplay = [
         "aplay", "-q",
         "-r", "22050",
         "-f", "S16_LE",
         "-c", "1"
     ]
-    '''
 
-    comando_aplay = [
-        "aplay", "-q",
-        "-r", "16000",
-        "-f", "S16_LE",
-        "-c", "1"
-    ]
 
     try:
         # Abre o processo do Piper
